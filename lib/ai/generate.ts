@@ -11,6 +11,12 @@ function outputLimit(model: LanguageModel): number {
   return isGroq ? config.ai.groqMaxOutputTokens : config.ai.maxOutputTokens;
 }
 
+/** GPT-OSS spends the output budget on reasoning too, which truncated long CVs. */
+function providerOptions(model: LanguageModel) {
+  const isGptOss = typeof model === "object" && model.modelId.includes("gpt-oss");
+  return isGptOss ? { groq: { reasoningEffort: "low" as const } } : undefined;
+}
+
 /**
  * One structured LLM call. The timeout covers every attempt together so that
  * a retry cannot push the route past its 60 s limit.
@@ -38,6 +44,7 @@ export async function generateStructured<T>(options: {
         output: Output.object({ schema }),
         temperature: config.ai.temperature,
         maxOutputTokens: maxOutputTokens ?? outputLimit(model),
+        providerOptions: providerOptions(model),
         abortSignal,
       });
       return result.output;

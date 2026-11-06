@@ -189,9 +189,16 @@ function hasTemporaryGithubError(candidate: Candidate): boolean {
   return TEMPORARY_GITHUB_ERRORS.includes(candidate.flags.githubError ?? "");
 }
 
+/** After HR lowers a threshold, a candidate can pass without the later steps ever having run. */
+function passedWithoutFollowUp(candidate: Candidate): boolean {
+  return candidate.step === "done" && Boolean(candidate.stage1?.passed) && !candidate.interview;
+}
+
 export function canRetry(candidate: Candidate): boolean {
   return (
-    candidate.step === "error" || (candidate.step === "done" && hasTemporaryGithubError(candidate))
+    candidate.step === "error" ||
+    (candidate.step === "done" && hasTemporaryGithubError(candidate)) ||
+    passedWithoutFollowUp(candidate)
   );
 }
 

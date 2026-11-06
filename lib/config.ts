@@ -26,6 +26,10 @@ export const config = {
     minChars: 200,
     maxLinks: 20,
     maxInjectionSnippets: 5,
+    maxDescriptionWords: 25,
+    maxExperienceEntries: 8,
+    maxProjects: 8,
+    maxSkills: 30,
     injectionSnippetContext: 40,
   },
   ai: {
@@ -34,7 +38,7 @@ export const config = {
     maxOutputTokens: 8_000,
     timeoutMs: 45_000,
     /** Groq's entry plans allow about 8k tokens a minute, prompt and answer together. */
-    groqMaxOutputTokens: 4_000,
+    groqMaxOutputTokens: 4_500,
     groqScoreMaxOutputTokens: 2_800,
     groqMaxEvidenceChars: 10_000,
     groqInterviewEvidenceChars: 6_000,

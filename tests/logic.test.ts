@@ -12,6 +12,7 @@ import {
   analyzableRepos, commitsByMonth, computeRedFlags, hasCI, hasTests, isGenericCommitMessage, packEvidence, pickRepos,
 } from "@/lib/github/metrics";
 import { parseDependencies, pickCodeFiles, pickManifests } from "@/lib/github/files";
+import { canRetry } from "@/lib/pipeline/runner";
 import { createCandidate } from "@/lib/store";
 import { mockGithubScore, mockJobParse, mockCvExtract } from "@/lib/ai/mock";
 import { wrap } from "@/lib/ai/prompts/shared";
@@ -334,6 +335,13 @@ function withEnv(env: Record<string, string>, run: () => void) {
     process.env = saved;
   }
 }
+
+test("a candidate who passes after a threshold change can run the missing steps", () => {
+  const rejected = { ...doneCandidate(), stage1: stage1({ passed: false }) };
+  assert.equal(canRetry(rejected), false);
+  const nowPassing = { ...doneCandidate(), stage1: stage1({ passed: true }) };
+  assert.equal(canRetry(nowPassing), true);
+});
 
 test("only next dev may fall back to mock on its own", () => {
   withEnv({}, () => assert.equal(isMockMode(), true));

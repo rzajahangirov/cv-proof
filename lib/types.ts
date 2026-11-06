@@ -64,6 +64,9 @@ export type HealthInfo = {
   primaryModel: string | null;
   ensemble: { id: string; available: boolean }[];
   ignoredModels: string[];
+  missingKeys: string[];
+  mockForced: boolean;
+  deployment: { commit: string | null; environment: string | null };
   github: boolean;
   models?: ModelProbe[];
   githubCheck?: GithubProbe;

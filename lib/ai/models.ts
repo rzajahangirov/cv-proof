@@ -90,13 +90,21 @@ export function getEnsembleModels(): ResolvedModel[] {
 }
 
 /**
- * Without keys the app falls back to fake answers, which is right for a demo
- * and wrong for real hiring. A broken setup in production must fail visibly, so
- * there mock mode has to be requested with MOCK_AI=true.
+ * Without keys `next dev` falls back to fake answers, which is right for trying
+ * the app and wrong for real hiring. Any deployed build must fail visibly
+ * instead, so there mock mode has to be requested with MOCK_AI=true.
  */
 export function isMockMode(): boolean {
   if (process.env.MOCK_AI === "true") return true;
-  return process.env.VERCEL_ENV !== "production" && getPrimaryModel() === null;
+  return process.env.NODE_ENV !== "production" && getPrimaryModel() === null;
+}
+
+/** Env var names only, never values: this goes to the browser. */
+function missingKeys(): string[] {
+  const primary = parseModelRef(process.env.AI_PRIMARY_MODEL ?? "");
+  const refs = [...(primary ? [primary] : []), ...parseEnsemble()];
+  const missing = refs.filter((ref) => !apiKeyFor(ref)).map((ref) => PROVIDERS[ref.provider].keyEnv);
+  return [...new Set(missing)];
 }
 
 export function getHealth(): HealthInfo {
@@ -109,6 +117,12 @@ export function getHealth(): HealthInfo {
       available: !mock && Boolean(apiKeyFor(ref)),
     })),
     ignoredModels: ignoredModels(),
+    missingKeys: missingKeys(),
+    mockForced: process.env.MOCK_AI === "true",
+    deployment: {
+      commit: process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ?? null,
+      environment: process.env.VERCEL_ENV ?? null,
+    },
     github: Boolean(process.env.GITHUB_TOKEN),
   };
 }

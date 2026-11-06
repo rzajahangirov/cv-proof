@@ -309,22 +309,6 @@ test("AI errors are classified through the retry wrapper", () => {
   assert.equal(classifyAiError(wrapped), "ai_rate_limited");
 });
 
-test("mock mode is never implicit in production", () => {
-  const saved = { ...process.env };
-  for (const key of ["AI_PRIMARY_MODEL", "AI_ENSEMBLE_MODELS", "MOCK_AI", "VERCEL_ENV"]) delete process.env[key];
-  try {
-    assert.equal(isMockMode(), true);
-    process.env.VERCEL_ENV = "preview";
-    assert.equal(isMockMode(), true);
-    process.env.VERCEL_ENV = "production";
-    assert.equal(isMockMode(), false);
-    process.env.MOCK_AI = "true";
-    assert.equal(isMockMode(), true);
-  } finally {
-    process.env = saved;
-  }
-});
-
 test("providers fail with their own error shapes", () => {
   const closed = new APICallError({
     message: "The model has been decommissioned",
@@ -350,6 +334,27 @@ function withEnv(env: Record<string, string>, run: () => void) {
     process.env = saved;
   }
 }
+
+test("only next dev may fall back to mock on its own", () => {
+  withEnv({}, () => assert.equal(isMockMode(), true));
+  withEnv({ NODE_ENV: "production" }, () => assert.equal(isMockMode(), false));
+  withEnv({ NODE_ENV: "production", MOCK_AI: "true" }, () => assert.equal(isMockMode(), true));
+});
+
+test("health names what is missing, never a value", () => {
+  withEnv({ NODE_ENV: "production", AI_PRIMARY_MODEL: "groq:openai/gpt-oss-120b", AI_ENSEMBLE_MODELS: "groq:openai/gpt-oss-120b", VERCEL_GIT_COMMIT_SHA: "abcdef1234", VERCEL_ENV: "production" }, () => {
+    const health = getHealth();
+    assert.equal(health.mock, false);
+    assert.equal(health.primaryModel, null);
+    assert.deepEqual(health.missingKeys, ["GROQ_API_KEY"]);
+    assert.deepEqual(health.deployment, { commit: "abcdef1", environment: "production" });
+  });
+  withEnv({ GROQ_API_KEY: "secret-value", AI_PRIMARY_MODEL: "groq:openai/gpt-oss-120b", MOCK_AI: "true" }, () => {
+    const health = getHealth();
+    assert.equal(health.mockForced, true);
+    assert.equal(JSON.stringify(health).includes("secret-value"), false);
+  });
+});
 
 test("groq models resolve, including ids that contain a slash", () => {
   withEnv({ GROQ_API_KEY: "x", GOOGLE_GENERATIVE_AI_API_KEY: "x", AI_PRIMARY_MODEL: "google:gemini-3.6-flash", AI_ENSEMBLE_MODELS: "google:gemini-3.6-flash, groq:openai/gpt-oss-120b" }, () => {

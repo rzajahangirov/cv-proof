@@ -12,6 +12,9 @@ export const az = {
   },
   banner: {
     mock: "Mock rejimi: AI açarları yoxdur və ya MOCK_AI aktivdir. Nəticələr saxtadır, yalnız nümayiş üçündür.",
+    mockForced:
+      "Mock rejimi: MOCK_AI=true təyin edilib, AI işləmir və nəticələr saxtadır. Bu dəyişəni Vercel-dən silin.",
+    missingKeys: "Bu açarlar tapılmadı: {keys}. Vercel-də Production mühitinə əlavə edib yenidən deploy edin.",
     noGithubToken:
       "GITHUB_TOKEN təyin edilməyib: GitHub sorğu limiti aşağıdır, bir neçə namizəddən sonra tükənə bilər.",
     missingModels: "Açarı olmayan modellər buraxılır: {models}",

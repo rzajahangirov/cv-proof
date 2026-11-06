@@ -19,6 +19,8 @@ export function MockBanner() {
   const missing = health.ensemble.filter((model) => !model.available).map((model) => model.id);
   const warnings = [
     !health.mock && !health.primaryModel && t("banner.notConfigured"),
+    health.missingKeys.length > 0 &&
+      t("banner.missingKeys", { keys: health.missingKeys.join(", ") }),
     health.ignoredModels.length > 0 &&
       t("banner.ignoredModels", { models: health.ignoredModels.join(", ") }),
     !health.github && t("banner.noGithubToken"),
@@ -33,7 +35,7 @@ export function MockBanner() {
         {health.mock && (
           <p className="flex items-center gap-2 font-medium">
             <FlaskConical className="size-4 shrink-0" aria-hidden />
-            {t("banner.mock")}
+            {t(health.mockForced ? "banner.mockForced" : "banner.mock")}
           </p>
         )}
         {warnings.map((warning) => (

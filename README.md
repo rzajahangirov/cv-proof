@@ -65,7 +65,7 @@ npm run dev
 
 Tətbiq <http://localhost:3000> ünvanında açılır.
 
-**Lokalda açarsız da işləyir.** `.env.local` boş qalsa, tətbiq mock rejimində açılır: AI cavabları saxtadır və bunu yuxarıdakı banner göstərir, CV oxunması və GitHub toplanması isə realdır. Vercel production-da isə açar yoxdursa, tətbiq saxta nəticə vermir, aydın xəta göstərir. Orada mock yalnız `MOCK_AI=true` ilə açılır.
+**Lokalda açarsız da işləyir.** `.env.local` boş qalsa, tətbiq mock rejimində açılır: AI cavabları saxtadır və bunu yuxarıdakı banner göstərir, CV oxunması və GitHub toplanması isə realdır. Deploy olunmuş tətbiqdə isə açar yoxdursa, saxta nəticə verilmir, ekranda çatışmayan dəyişən yazılır. Orada mock yalnız `MOCK_AI=true` ilə açılır.
 
 ### Mühit dəyişənləri
 

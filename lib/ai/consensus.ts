@@ -1,7 +1,7 @@
 import { classifyAiError } from "@/lib/ai/errors";
 import { generateStructured } from "@/lib/ai/generate";
 import { MOCK_MODEL_IDS, mockGithubScore } from "@/lib/ai/mock";
-import { getEnsembleModels, getPrimaryModel, isMockMode } from "@/lib/ai/models";
+import { getEnsembleModels, getPrimaryModel, isGroqModel, isMockMode } from "@/lib/ai/models";
 import type { ResolvedModel } from "@/lib/ai/models";
 import { githubScorePrompt, githubScoreSystem } from "@/lib/ai/prompts/github-score";
 import { config } from "@/lib/config";
@@ -19,10 +19,6 @@ function ensembleTargets(): EnsembleTarget[] {
   // Only AI_PRIMARY_MODEL is set: one opinion still beats no GitHub check.
   const primary = getPrimaryModel();
   return primary ? [primary] : [];
-}
-
-function isGroq(modelId: string): boolean {
-  return modelId.startsWith("groq:");
 }
 
 function failedScore(modelId: string, reason: unknown): ModelScore {
@@ -53,7 +49,7 @@ export async function runEnsemble(input: {
   const system = githubScoreSystem(job.lang);
   // Every model gets the same input, or their scores could not be compared.
   // So the model with the tightest limit sets the evidence size for all of them.
-  const evidenceLimit = targets.some((target) => isGroq(target.id))
+  const evidenceLimit = targets.some((target) => isGroqModel(target.id))
     ? config.ai.groqMaxEvidenceChars
     : config.github.maxEvidenceChars;
   const prompt = githubScorePrompt({ ...input, evidence: packEvidence(evidence, evidenceLimit) });
@@ -66,7 +62,7 @@ export async function runEnsemble(input: {
         prompt,
         schema: githubScoreOutputSchema,
         mock: () => mockGithubScore(target.id, { claims, evidence }),
-        maxOutputTokens: isGroq(target.id) ? config.ai.groqMaxOutputTokens : undefined,
+        maxOutputTokens: isGroqModel(target.id) ? config.ai.groqScoreMaxOutputTokens : undefined,
       }),
     ),
   );

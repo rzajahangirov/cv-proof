@@ -85,7 +85,7 @@ Açarların hamısı lazım deyil, açarı olmayan model sadəcə buraxılır. �
 
 `AI_PRIMARY_MODEL` üçün sürətli model seçin: hər AI addımının 45 saniyə vaxtı var, uzun CV-lərdə yavaş model bu limiti aşa bilər. Limitlər [lib/config.ts](lib/config.ts) faylındadır.
 
-Groq-u yalnız ansamblda işlədin, əsas model etməyin. Onun dəqiqəlik token limiti aşağıdır, ona görə ansamblda Groq olanda bütün modellərə GitHub sübutu qısaldılmış göndərilir. Model seçəndə provayderin cari siyahısına baxın, bağlanmış model `ai_model_not_found` xətası verir.
+Groq-un dəqiqəlik token limiti aşağıdır, ona görə Groq modellərinə CV mətni və GitHub sübutu qısaldılmış göndərilir. Yalnız strukturlu cavabı dəstəkləyən model seçin, məsələn `groq:openai/gpt-oss-120b`. Model seçəndə provayderin cari siyahısına baxın, bağlanmış model `ai_model_not_found` xətası verir.
 
 > `GITHUB_TOKEN` olmadan GitHub saatda cəmi 60 sorğuya icazə verir, bir namizəd isə 40-a qədər sorğu işlədir. Real sınaq üçün token mütləq əlavə edin.
 

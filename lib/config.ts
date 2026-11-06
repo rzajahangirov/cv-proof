@@ -8,7 +8,8 @@ export const config = {
     verdictValue: { met: 1, partial: 0.5, missing: 0 },
   },
   pipeline: {
-    concurrency: 2,
+    /** One at a time: free AI plans rate-limit parallel candidates. */
+    concurrency: 1,
   },
   files: {
     maxBytes: 4 * 1024 * 1024,
@@ -33,8 +34,11 @@ export const config = {
     maxOutputTokens: 8_000,
     timeoutMs: 45_000,
     /** Groq's entry plans allow about 8k tokens a minute, prompt and answer together. */
-    groqMaxOutputTokens: 2_800,
+    groqMaxOutputTokens: 4_000,
+    groqScoreMaxOutputTokens: 2_800,
     groqMaxEvidenceChars: 10_000,
+    groqInterviewEvidenceChars: 6_000,
+    groqMaxCvChars: 8_000,
     /** Reasoning models spend part of this before they answer. */
     probeMaxOutputTokens: 2_000,
     probeTimeoutMs: 20_000,

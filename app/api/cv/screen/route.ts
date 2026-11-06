@@ -1,6 +1,6 @@
 import { generateStructured } from "@/lib/ai/generate";
 import { mockScreen } from "@/lib/ai/mock";
-import { getPrimaryModel } from "@/lib/ai/models";
+import { getPrimaryModel, isGroqModel } from "@/lib/ai/models";
 import { screenPrompt, screenSystem } from "@/lib/ai/prompts/screen";
 import { readJson, route } from "@/lib/api";
 import { config } from "@/lib/config";
@@ -12,7 +12,8 @@ export const maxDuration = 60;
 
 export const POST = route(async (request): Promise<ScreenResponse> => {
   const input = await readJson(request, cvScreenInputSchema);
-  const { job } = input;
+  const { job, redactedCvText } = input;
+  const primary = getPrimaryModel();
 
   // A skipped "must" criterion would silently knock the candidate out, so an
   // incomplete answer counts as a schema failure and gets retried.
@@ -23,9 +24,14 @@ export const POST = route(async (request): Promise<ScreenResponse> => {
   );
 
   const output = await generateStructured({
-    model: getPrimaryModel()?.model ?? null,
+    model: primary?.model ?? null,
     system: screenSystem(job.lang),
-    prompt: screenPrompt(input),
+    prompt: screenPrompt({
+      ...input,
+      redactedCvText: isGroqModel(primary?.id)
+        ? redactedCvText.slice(0, config.ai.groqMaxCvChars)
+        : redactedCvText,
+    }),
     schema,
     mock: () => mockScreen(input),
   });

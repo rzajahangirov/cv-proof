@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { APICallError, RetryError } from "ai";
 import { classifyAiError } from "@/lib/ai/errors";
-import { getEnsembleModels, getHealth, getPrimaryModel, isMockMode } from "@/lib/ai/models";
+import { getEnsembleModels, getHealth, getPrimaryModel, isGroqModel, isMockMode } from "@/lib/ai/models";
 import { config } from "@/lib/config";
 import { computeConsensus, computeStage1, finalize, mergeClaims, rescoreCandidate } from "@/lib/scoring";
 import { detectInjection } from "@/lib/cv/injection";
@@ -356,6 +356,15 @@ test("groq models resolve, including ids that contain a slash", () => {
     assert.deepEqual(getEnsembleModels().map((m) => m.id), ["google:gemini-3.6-flash", "groq:openai/gpt-oss-120b"]);
     assert.equal(getPrimaryModel()?.id, "google:gemini-3.6-flash");
     assert.deepEqual(getHealth().ignoredModels, []);
+  });
+});
+
+test("groq primary models are recognized for their tight limits", () => {
+  withEnv({ GROQ_API_KEY: "x", AI_PRIMARY_MODEL: "groq:openai/gpt-oss-120b", AI_ENSEMBLE_MODELS: "groq:openai/gpt-oss-120b" }, () => {
+    const primary = getPrimaryModel();
+    assert.equal(isGroqModel(primary?.id), true);
+    assert.ok(typeof primary?.model === "object" && primary.model.provider.startsWith("groq"));
+    assert.equal(isMockMode(), false);
   });
 });
 

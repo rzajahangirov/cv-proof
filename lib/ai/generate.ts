@@ -6,6 +6,11 @@ import { isMockMode } from "@/lib/ai/models";
 import { ApiError } from "@/lib/api";
 import { config } from "@/lib/config";
 
+function outputLimit(model: LanguageModel): number {
+  const isGroq = typeof model === "object" && model.provider.startsWith("groq");
+  return isGroq ? config.ai.groqMaxOutputTokens : config.ai.maxOutputTokens;
+}
+
 /**
  * One structured LLM call. The timeout covers every attempt together so that
  * a retry cannot push the route past its 60 s limit.
@@ -32,7 +37,7 @@ export async function generateStructured<T>(options: {
         prompt,
         output: Output.object({ schema }),
         temperature: config.ai.temperature,
-        maxOutputTokens: maxOutputTokens ?? config.ai.maxOutputTokens,
+        maxOutputTokens: maxOutputTokens ?? outputLimit(model),
         abortSignal,
       });
       return result.output;

@@ -1,6 +1,6 @@
 import { generateStructured } from "@/lib/ai/generate";
 import { mockCvExtract } from "@/lib/ai/mock";
-import { getPrimaryModel } from "@/lib/ai/models";
+import { getPrimaryModel, isGroqModel } from "@/lib/ai/models";
 import { cvExtractPrompt, cvExtractSystem } from "@/lib/ai/prompts/cv-extract";
 import { ApiError, route } from "@/lib/api";
 import { config } from "@/lib/config";
@@ -35,11 +35,13 @@ export const POST = route(async (request): Promise<CvParseResponse> => {
   const data = new Uint8Array(await file.arrayBuffer());
   const { cvText, fullText } = await extractCvText(data, file.name);
   const regexInjection = detectInjection(fullText);
+  const primary = getPrimaryModel();
+  const promptText = isGroqModel(primary?.id) ? cvText.slice(0, config.ai.groqMaxCvChars) : cvText;
 
   const { injectionDetected, ...profile } = await generateStructured({
-    model: getPrimaryModel()?.model ?? null,
+    model: primary?.model ?? null,
     system: cvExtractSystem(lang),
-    prompt: cvExtractPrompt(cvText),
+    prompt: cvExtractPrompt(promptText),
     schema: cvExtractOutputSchema,
     mock: () => mockCvExtract(cvText),
   });

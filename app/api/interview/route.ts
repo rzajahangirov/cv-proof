@@ -1,6 +1,6 @@
 import { generateStructured } from "@/lib/ai/generate";
 import { mockInterview } from "@/lib/ai/mock";
-import { getPrimaryModel } from "@/lib/ai/models";
+import { getPrimaryModel, isGroqModel } from "@/lib/ai/models";
 import { interviewPrompt, interviewSystem } from "@/lib/ai/prompts/interview";
 import { readJson, route } from "@/lib/api";
 import { config } from "@/lib/config";
@@ -15,11 +15,16 @@ const { interview } = config;
 export const POST = route(async (request): Promise<InterviewKit> => {
   const input = await readJson(request, interviewInputSchema);
   const { job, mergedClaims, stage1, evidence } = input;
+  const primary = getPrimaryModel();
+  const evidenceLimit = isGroqModel(primary?.id) ? config.ai.groqInterviewEvidenceChars : undefined;
 
   const output = await generateStructured({
-    model: getPrimaryModel()?.model ?? null,
+    model: primary?.model ?? null,
     system: interviewSystem(job.lang),
-    prompt: interviewPrompt({ ...input, evidence: evidence && packEvidence(evidence) }),
+    prompt: interviewPrompt({
+      ...input,
+      evidence: evidence && packEvidence(evidence, evidenceLimit),
+    }),
     schema: interviewOutputSchema,
     mock: () => mockInterview(input),
   });

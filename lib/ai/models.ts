@@ -64,6 +64,10 @@ function ignoredModels(): string[] {
   return [...new Set(ignored)];
 }
 
+export function isGroqModel(id: string | undefined): boolean {
+  return id?.startsWith("groq:") ?? false;
+}
+
 function apiKeyFor(ref: ModelRef): string | undefined {
   return process.env[PROVIDERS[ref.provider].keyEnv] || undefined;
 }

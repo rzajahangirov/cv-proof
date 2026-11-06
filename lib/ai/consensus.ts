@@ -21,6 +21,10 @@ function ensembleTargets(): EnsembleTarget[] {
   return primary ? [primary] : [];
 }
 
+function isGroq(modelId: string): boolean {
+  return modelId.startsWith("groq:");
+}
+
 function failedScore(modelId: string, reason: unknown): ModelScore {
   const code = classifyAiError(reason);
   console.error("[ensemble]", modelId, code, reason instanceof Error ? reason.message : "");
@@ -47,7 +51,12 @@ export async function runEnsemble(input: {
   const targets = ensembleTargets();
   const knownClaims = new Set(claims.map((claim) => claim.id));
   const system = githubScoreSystem(job.lang);
-  const prompt = githubScorePrompt({ ...input, evidence: packEvidence(evidence) });
+  // Every model gets the same input, or their scores could not be compared.
+  // So the model with the tightest limit sets the evidence size for all of them.
+  const evidenceLimit = targets.some((target) => isGroq(target.id))
+    ? config.ai.groqMaxEvidenceChars
+    : config.github.maxEvidenceChars;
+  const prompt = githubScorePrompt({ ...input, evidence: packEvidence(evidence, evidenceLimit) });
 
   const settled = await Promise.allSettled(
     targets.map((target) =>
@@ -57,6 +66,7 @@ export async function runEnsemble(input: {
         prompt,
         schema: githubScoreOutputSchema,
         mock: () => mockGithubScore(target.id, { claims, evidence }),
+        maxOutputTokens: isGroq(target.id) ? config.ai.groqMaxOutputTokens : undefined,
       }),
     ),
   );

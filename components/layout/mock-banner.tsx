@@ -19,6 +19,8 @@ export function MockBanner() {
   const missing = health.ensemble.filter((model) => !model.available).map((model) => model.id);
   const warnings = [
     !health.mock && !health.primaryModel && t("banner.notConfigured"),
+    health.ignoredModels.length > 0 &&
+      t("banner.ignoredModels", { models: health.ignoredModels.join(", ") }),
     !health.github && t("banner.noGithubToken"),
     !health.mock && missing.length > 0 && t("banner.missingModels", { models: missing.join(", ") }),
   ].filter((message): message is string => Boolean(message));

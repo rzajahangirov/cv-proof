@@ -16,6 +16,8 @@ export const az = {
       "GITHUB_TOKEN təyin edilməyib: GitHub sorğu limiti aşağıdır, bir neçə namizəddən sonra tükənə bilər.",
     missingModels: "Açarı olmayan modellər buraxılır: {models}",
     notConfigured: "AI modeli qurulmayıb. Analiz işləməyəcək: açarları və model adlarını yoxlayın.",
+    ignoredModels:
+      "Bu model yazılışları tanınmadı və istifadə olunmur: {models}. Format: provider:modelId (anthropic, openai, google, groq).",
   },
   common: {
     loading: "Yüklənir…",
@@ -158,6 +160,7 @@ export const az = {
     flagRedFlags: "{count} xəbərdarlıq siqnalı",
     flagGithubError: "GitHub yoxlanıla bilmədi",
     flagNeedsReview: "AI modelləri razılaşmır",
+    flagModelsMissing: "Yalnız {ok}/{total} AI modeli cavab verdi",
     inProgress: "Analiz gedir",
     hrDecision: "HR: {decision}",
   },

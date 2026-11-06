@@ -2,7 +2,8 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { APICallError, RetryError } from "ai";
 import { classifyAiError } from "@/lib/ai/errors";
-import { isMockMode } from "@/lib/ai/models";
+import { getEnsembleModels, getHealth, getPrimaryModel, isMockMode } from "@/lib/ai/models";
+import { config } from "@/lib/config";
 import { computeConsensus, computeStage1, finalize, mergeClaims, rescoreCandidate } from "@/lib/scoring";
 import { detectInjection } from "@/lib/cv/injection";
 import { redactCvText, toBlindProfile } from "@/lib/cv/blind";
@@ -322,4 +323,53 @@ test("mock mode is never implicit in production", () => {
   } finally {
     process.env = saved;
   }
+});
+
+test("providers fail with their own error shapes", () => {
+  const closed = new APICallError({
+    message: "The model has been decommissioned",
+    url: "u",
+    requestBodyValues: {},
+    statusCode: 400,
+    isRetryable: false,
+  });
+  assert.equal(classifyAiError(closed), "ai_model_not_found");
+  assert.equal(classifyAiError(apiError(413)), "ai_rate_limited");
+  assert.equal(classifyAiError(apiError(400, "Generated JSON does not match the expected schema")), "ai_invalid_output");
+});
+
+function withEnv(env: Record<string, string>, run: () => void) {
+  const saved = { ...process.env };
+  for (const key of ["AI_PRIMARY_MODEL", "AI_ENSEMBLE_MODELS", "MOCK_AI", "VERCEL_ENV", "ANTHROPIC_API_KEY", "OPENAI_API_KEY", "GOOGLE_GENERATIVE_AI_API_KEY", "GROQ_API_KEY"]) {
+    delete process.env[key];
+  }
+  Object.assign(process.env, env);
+  try {
+    run();
+  } finally {
+    process.env = saved;
+  }
+}
+
+test("groq models resolve, including ids that contain a slash", () => {
+  withEnv({ GROQ_API_KEY: "x", GOOGLE_GENERATIVE_AI_API_KEY: "x", AI_PRIMARY_MODEL: "google:gemini-3.6-flash", AI_ENSEMBLE_MODELS: "google:gemini-3.6-flash, groq:openai/gpt-oss-120b" }, () => {
+    assert.deepEqual(getEnsembleModels().map((m) => m.id), ["google:gemini-3.6-flash", "groq:openai/gpt-oss-120b"]);
+    assert.equal(getPrimaryModel()?.id, "google:gemini-3.6-flash");
+    assert.deepEqual(getHealth().ignoredModels, []);
+  });
+});
+
+test("a model the app cannot use is reported, not silently dropped", () => {
+  withEnv({ GOOGLE_GENERATIVE_AI_API_KEY: "x", AI_PRIMARY_MODEL: "cohere:command", AI_ENSEMBLE_MODELS: "google:gemini-3.6-flash,mistral:large,bad-entry,openai:MODEL_ID" }, () => {
+    assert.deepEqual(getHealth().ignoredModels, ["cohere:command", "mistral:large", "bad-entry"]);
+    assert.deepEqual(getEnsembleModels().map((m) => m.id), ["google:gemini-3.6-flash"]);
+  });
+});
+
+test("the tight evidence budget still carries code", () => {
+  const evidence = { username: "u", profileUrl: "", accountCreatedAt: "", publicRepos: 5, ownRepos: 5, forkRepos: 0, aggregateLanguages: {},
+    commitsByMonth: [], repos: Array.from({ length: 5 }, (_, i) => bigRepo(i)), redFlags: [] } as GithubEvidence;
+  const packed = packEvidence(evidence, config.ai.groqMaxEvidenceChars);
+  assert.ok(JSON.stringify(packed).length <= config.ai.groqMaxEvidenceChars);
+  assert.ok(packed.repos.some((repo) => repo.codeSamples.length > 0), "code samples must survive");
 });

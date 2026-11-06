@@ -74,7 +74,8 @@ Tətbiq <http://localhost:3000> ünvanında açılır.
 | `ANTHROPIC_API_KEY` | Anthropic açarı |
 | `OPENAI_API_KEY` | OpenAI açarı |
 | `GOOGLE_GENERATIVE_AI_API_KEY` | Google AI açarı |
-| `AI_ENSEMBLE_MODELS` | GitHub qiymətləndirməsi üçün modellər, vergüllə: `provider:modelId` |
+| `GROQ_API_KEY` | Groq açarı |
+| `AI_ENSEMBLE_MODELS` | GitHub qiymətləndirməsi üçün modellər, vergüllə: `provider:modelId`. Provayderlər: `anthropic`, `openai`, `google`, `groq` |
 | `AI_PRIMARY_MODEL` | Qalan bütün addımlar üçün bir model: `provider:modelId` |
 | `GITHUB_TOKEN` | GitHub fine-grained token (yalnız ictimai repoları oxumaq) |
 | `MOCK_AI` | `true` olsa, açar olsa belə saxta AI cavabları işlədilir |
@@ -83,6 +84,8 @@ Tətbiq <http://localhost:3000> ünvanında açılır.
 Açarların hamısı lazım deyil, açarı olmayan model sadəcə buraxılır. Əsas model əlçatan deyilsə, açarı olan ilk ansambl modeli istifadə olunur.
 
 `AI_PRIMARY_MODEL` üçün sürətli model seçin: hər AI addımının 45 saniyə vaxtı var, uzun CV-lərdə yavaş model bu limiti aşa bilər. Limitlər [lib/config.ts](lib/config.ts) faylındadır.
+
+Groq-u yalnız ansamblda işlədin, əsas model etməyin. Onun dəqiqəlik token limiti aşağıdır, ona görə ansamblda Groq olanda bütün modellərə GitHub sübutu qısaldılmış göndərilir. Model seçəndə provayderin cari siyahısına baxın, bağlanmış model `ai_model_not_found` xətası verir.
 
 > `GITHUB_TOKEN` olmadan GitHub saatda cəmi 60 sorğuya icazə verir, bir namizəd isə 40-a qədər sorğu işlədir. Real sınaq üçün token mütləq əlavə edin.
 
@@ -151,7 +154,7 @@ lib/
 
 ## Texnologiyalar
 
-Next.js, TypeScript, Tailwind CSS, shadcn/ui, Vercel AI SDK (Anthropic, OpenAI, Google), Octokit, unpdf, mammoth, Zustand, TanStack Table, Recharts.
+Next.js, TypeScript, Tailwind CSS, shadcn/ui, Vercel AI SDK (Anthropic, OpenAI, Google, Groq), Octokit, unpdf, mammoth, Zustand, TanStack Table, Recharts.
 
 ## Məhdudiyyətlər
 

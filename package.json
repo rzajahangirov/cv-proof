@@ -12,6 +12,7 @@
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.97",
     "@ai-sdk/google": "^4.0.112",
+    "@ai-sdk/groq": "^4.0.77",
     "@ai-sdk/openai": "^4.0.109",
     "@octokit/rest": "^22.0.1",
     "@tanstack/react-table": "^9.3.1",

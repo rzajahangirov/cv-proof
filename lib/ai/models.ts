@@ -1,5 +1,6 @@
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { createGroq } from "@ai-sdk/groq";
 import { createOpenAI } from "@ai-sdk/openai";
 import type { LanguageModel } from "ai";
 import type { HealthInfo } from "@/lib/types";
@@ -16,6 +17,10 @@ const PROVIDERS = {
   google: {
     keyEnv: "GOOGLE_GENERATIVE_AI_API_KEY",
     create: (apiKey: string, modelId: string) => createGoogleGenerativeAI({ apiKey })(modelId),
+  },
+  groq: {
+    keyEnv: "GROQ_API_KEY",
+    create: (apiKey: string, modelId: string) => createGroq({ apiKey })(modelId),
   },
 } as const;
 
@@ -39,10 +44,24 @@ function parseModelRef(value: string): ModelRef | null {
   return { id, provider: provider as ProviderName, modelId };
 }
 
-function parseEnsemble(): ModelRef[] {
+function ensembleEntries(): string[] {
   return (process.env.AI_ENSEMBLE_MODELS ?? "")
     .split(",")
-    .flatMap((value) => parseModelRef(value) ?? []);
+    .map((value) => value.trim())
+    .filter(Boolean);
+}
+
+function parseEnsemble(): ModelRef[] {
+  return ensembleEntries().flatMap((value) => parseModelRef(value) ?? []);
+}
+
+/** Entries nothing can use, such as a provider this app does not support. */
+function ignoredModels(): string[] {
+  const entries = [process.env.AI_PRIMARY_MODEL?.trim() ?? "", ...ensembleEntries()];
+  const ignored = entries.filter(
+    (value) => value && !parseModelRef(value) && !value.endsWith(`:${PLACEHOLDER_MODEL_ID}`),
+  );
+  return [...new Set(ignored)];
 }
 
 function apiKeyFor(ref: ModelRef): string | undefined {
@@ -85,6 +104,7 @@ export function getHealth(): HealthInfo {
       id: ref.id,
       available: !mock && Boolean(apiKeyFor(ref)),
     })),
+    ignoredModels: ignoredModels(),
     github: Boolean(process.env.GITHUB_TOKEN),
   };
 }

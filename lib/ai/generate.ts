@@ -1,13 +1,10 @@
-import { generateText, NoObjectGeneratedError, NoOutputGeneratedError, Output } from "ai";
+import { generateText, Output } from "ai";
 import type { LanguageModel } from "ai";
 import type { z } from "zod";
+import { classifyAiError } from "@/lib/ai/errors";
 import { isMockMode } from "@/lib/ai/models";
 import { ApiError } from "@/lib/api";
 import { config } from "@/lib/config";
-
-function isSchemaFailure(error: unknown): boolean {
-  return NoObjectGeneratedError.isInstance(error) || NoOutputGeneratedError.isInstance(error);
-}
 
 /**
  * One structured LLM call. The timeout covers every attempt together so that
@@ -19,8 +16,9 @@ export async function generateStructured<T>(options: {
   prompt: string;
   schema: z.ZodType<T>;
   mock: () => T;
+  maxOutputTokens?: number;
 }): Promise<T> {
-  const { model, system, prompt, schema, mock } = options;
+  const { model, system, prompt, schema, mock, maxOutputTokens } = options;
   if (isMockMode()) return mock();
   if (!model) throw new ApiError("ai_not_configured", "No AI model is configured", 503);
 
@@ -34,12 +32,13 @@ export async function generateStructured<T>(options: {
         prompt,
         output: Output.object({ schema }),
         temperature: config.ai.temperature,
-        maxOutputTokens: config.ai.maxOutputTokens,
+        maxOutputTokens: maxOutputTokens ?? config.ai.maxOutputTokens,
         abortSignal,
       });
       return result.output;
     } catch (error) {
-      if (attempt >= config.ai.schemaRetries || !isSchemaFailure(error)) throw error;
+      const canRetry = classifyAiError(error) === "ai_invalid_output";
+      if (attempt >= config.ai.schemaRetries || !canRetry) throw error;
     }
   }
 }

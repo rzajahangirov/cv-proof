@@ -32,7 +32,11 @@ export const config = {
     /** Long enough for a full interview kit in Azerbaijani; defaults vary by provider. */
     maxOutputTokens: 8_000,
     timeoutMs: 45_000,
-    probeMaxOutputTokens: 500,
+    /** Groq's entry plans allow about 8k tokens a minute, prompt and answer together. */
+    groqMaxOutputTokens: 2_800,
+    groqMaxEvidenceChars: 10_000,
+    /** Reasoning models spend part of this before they answer. */
+    probeMaxOutputTokens: 2_000,
     probeTimeoutMs: 20_000,
     schemaRetries: 1,
     maxClaims: 10,
@@ -68,6 +72,8 @@ export const config = {
       { code: 2_000, readme: 1_200, messages: 20 },
       { code: 1_200, readme: 800, messages: 15 },
       { code: 600, readme: 400, messages: 10 },
+      // Code says more than commit messages, so it is the last thing to go.
+      { code: 400, readme: 200, messages: 5 },
       { code: 0, readme: 200, messages: 5 },
     ],
     collectTimeoutMs: 50_000,

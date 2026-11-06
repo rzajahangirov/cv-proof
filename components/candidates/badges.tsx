@@ -1,6 +1,6 @@
 "use client";
 
-import { GitBranch, Scale, ShieldAlert, TriangleAlert } from "lucide-react";
+import { BotOff, GitBranch, Scale, ShieldAlert, TriangleAlert } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -71,6 +71,16 @@ export function FlagIcons({ candidate }: { candidate: Candidate }) {
       )}
       {consensus?.needsReview && (
         <FlagIcon icon={Scale} label={t("candidates.flagNeedsReview")} className="text-violet-600" />
+      )}
+      {consensus && consensus.modelsOk < consensus.modelsTotal && (
+        <FlagIcon
+          icon={BotOff}
+          label={t("candidates.flagModelsMissing", {
+            ok: consensus.modelsOk,
+            total: consensus.modelsTotal,
+          })}
+          className="text-amber-600"
+        />
       )}
       {redFlagCount > 0 && (
         <FlagIcon

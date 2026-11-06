@@ -133,11 +133,12 @@ export function computeRedFlags(input: {
 }
 
 /** Shrinks the pack for LLM prompts until it fits the character budget (plan §10). */
-export function packEvidence(evidence: GithubEvidence): GithubEvidence {
-  const { maxEvidenceChars, evidenceTrimSteps } = config.github;
-
+export function packEvidence(
+  evidence: GithubEvidence,
+  limit: number = config.github.maxEvidenceChars,
+): GithubEvidence {
   let packed = evidence;
-  for (const step of evidenceTrimSteps) {
+  for (const step of config.github.evidenceTrimSteps) {
     packed = {
       ...evidence,
       repos: evidence.repos.map((repo) => ({
@@ -149,7 +150,7 @@ export function packEvidence(evidence: GithubEvidence): GithubEvidence {
           : [],
       })),
     };
-    if (JSON.stringify(packed).length <= maxEvidenceChars) break;
+    if (JSON.stringify(packed).length <= limit) break;
   }
   return packed;
 }

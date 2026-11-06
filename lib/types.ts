@@ -63,6 +63,7 @@ export type HealthInfo = {
   mock: boolean;
   primaryModel: string | null;
   ensemble: { id: string; available: boolean }[];
+  ignoredModels: string[];
   github: boolean;
   models?: ModelProbe[];
   githubCheck?: GithubProbe;

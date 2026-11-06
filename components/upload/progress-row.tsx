@@ -1,17 +1,17 @@
 "use client";
 
-import { CircleCheck, CircleDashed, CircleX, Loader2, RotateCw, X } from "lucide-react";
+import { CircleAlert, CircleCheck, CircleDashed, CircleX, Loader2, RotateCw, X } from "lucide-react";
 import { Fragment } from "react";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n";
 import { errorKey } from "@/lib/i18n/core";
 import type { MessageKey } from "@/lib/i18n/core";
-import { retryCandidate } from "@/lib/pipeline/runner";
+import { canRetry, retryCandidate } from "@/lib/pipeline/runner";
 import { isRunning, useStore } from "@/lib/store";
 import type { Candidate, PipelineStep } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-type StageState = "done" | "active" | "failed" | "skipped" | "pending";
+type StageState = "done" | "warning" | "active" | "failed" | "skipped" | "pending";
 
 const STAGES: { label: MessageKey; step: PipelineStep; isDone: (c: Candidate) => boolean }[] = [
   { label: "pipeline.parse", step: "parsing", isDone: (c) => c.profile !== null },
@@ -27,6 +27,7 @@ const STAGES: { label: MessageKey; step: PipelineStep; isDone: (c: Candidate) =>
 
 function stageState(candidate: Candidate, index: number): StageState {
   const stage = STAGES[index];
+  if (stage.step === "collecting" && candidate.flags.githubError) return "warning";
   if (stage.isDone(candidate)) return "done";
   if (candidate.step === stage.step) return "active";
   if (candidate.step === "done") return "skipped";
@@ -38,6 +39,7 @@ function stageState(candidate: Candidate, index: number): StageState {
 
 const STAGE_STYLES: Record<StageState, string> = {
   done: "text-emerald-700",
+  warning: "text-amber-700 font-medium",
   active: "text-primary font-medium",
   failed: "text-red-700 font-medium",
   skipped: "text-muted-foreground/60 line-through",
@@ -46,6 +48,7 @@ const STAGE_STYLES: Record<StageState, string> = {
 
 function StageIcon({ state }: { state: StageState }) {
   if (state === "done") return <CircleCheck className="size-4" aria-hidden />;
+  if (state === "warning") return <CircleAlert className="size-4" aria-hidden />;
   if (state === "active") return <Loader2 className="size-4 animate-spin" aria-hidden />;
   if (state === "failed") return <CircleX className="size-4" aria-hidden />;
   return <CircleDashed className="size-4" aria-hidden />;
@@ -54,6 +57,13 @@ function StageIcon({ state }: { state: StageState }) {
 export function ProgressRow({ candidate }: { candidate: Candidate }) {
   const t = useT();
   const removeCandidate = useStore((state) => state.removeCandidate);
+
+  const statusText =
+    candidate.step === "error"
+      ? t(errorKey(candidate.error))
+      : candidate.step === "done" && candidate.flags.githubError
+        ? t(errorKey(candidate.flags.githubError))
+        : t(`step.${candidate.step}`);
 
   return (
     <div className="flex items-center gap-4 border-b px-1 py-3 last:border-b-0">
@@ -64,12 +74,12 @@ export function ProgressRow({ candidate }: { candidate: Candidate }) {
         <p
           className={cn(
             "truncate text-sm",
-            candidate.step === "error" ? "text-red-700" : "text-muted-foreground",
+            candidate.step === "error" && "text-red-700",
+            candidate.step === "done" && candidate.flags.githubError && "text-amber-700",
+            candidate.step !== "error" && !candidate.flags.githubError && "text-muted-foreground",
           )}
         >
-          {candidate.step === "error"
-            ? t(errorKey(candidate.error))
-            : t(`step.${candidate.step}`)}
+          {statusText}
         </p>
       </div>
 
@@ -88,8 +98,8 @@ export function ProgressRow({ candidate }: { candidate: Candidate }) {
         })}
       </ol>
 
-      <div className="flex w-36 shrink-0 justify-end gap-1">
-        {candidate.step === "error" && (
+      <div className="flex w-44 shrink-0 justify-end gap-1">
+        {canRetry(candidate) && (
           <Button variant="outline" size="sm" onClick={() => retryCandidate(candidate.id)}>
             <RotateCw aria-hidden />
             {t("upload.retry")}

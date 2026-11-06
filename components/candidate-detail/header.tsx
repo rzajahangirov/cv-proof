@@ -28,7 +28,11 @@ export function DetailHeader({ candidate }: { candidate: Candidate }) {
     <div className="space-y-4">
       <Card>
         <CardContent className="flex flex-wrap items-center gap-6">
-          <ScoreGauge score={candidate.finalScore} label={t("detail.finalScore")} />
+          <ScoreGauge
+            score={candidate.finalScore}
+            label={t("detail.finalScore")}
+            emptyLabel={t("common.notAvailable")}
+          />
 
           <div className="min-w-64 flex-1 space-y-2">
             <h1 className="text-2xl font-semibold tracking-tight">

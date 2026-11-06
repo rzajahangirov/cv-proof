@@ -1,15 +1,24 @@
+import { config } from "@/lib/config";
 import { cn } from "@/lib/utils";
 
 const RADIUS = 42;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 function scoreColor(score: number): string {
-  if (score >= 70) return "text-emerald-600";
-  if (score >= 50) return "text-amber-500";
+  if (score >= config.ui.gaugeGoodScore) return "text-emerald-600";
+  if (score >= config.ui.gaugeMediumScore) return "text-amber-500";
   return "text-slate-400";
 }
 
-export function ScoreGauge({ score, label }: { score: number | null; label: string }) {
+export function ScoreGauge({
+  score,
+  label,
+  emptyLabel,
+}: {
+  score: number | null;
+  label: string;
+  emptyLabel: string;
+}) {
   const value = score ?? 0;
 
   return (
@@ -30,7 +39,7 @@ export function ScoreGauge({ score, label }: { score: number | null; label: stri
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-3xl font-semibold tabular-nums">{score ?? "—"}</span>
+        <span className="text-3xl font-semibold tabular-nums">{score ?? emptyLabel}</span>
         <span className="text-[11px] text-muted-foreground">{label}</span>
       </div>
     </div>

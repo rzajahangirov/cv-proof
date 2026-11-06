@@ -21,6 +21,7 @@ export function parseExport(text: string): ExportFile | null {
 
 export type DemoResult = { status: "ok"; data: ExportFile } | { status: "missing" | "invalid" };
 
+// TODO(HUMAN): run a real analysis, export it and save it as public/demo/demo-results.json.
 export async function fetchDemo(): Promise<DemoResult> {
   const response = await fetch("/demo/demo-results.json").catch(() => null);
   if (!response?.ok) return { status: "missing" };

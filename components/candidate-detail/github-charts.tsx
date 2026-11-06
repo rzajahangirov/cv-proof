@@ -5,10 +5,9 @@ import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import type { ChartConfig } from "@/components/ui/chart";
+import { config } from "@/lib/config";
 import { useI18n } from "@/lib/i18n";
 import type { GithubEvidence } from "@/lib/types";
-
-const MAX_LANGUAGES = 8;
 
 export function GithubCharts({ github }: { github: GithubEvidence }) {
   const { t, formatDate } = useI18n();
@@ -17,7 +16,7 @@ export function GithubCharts({ github }: { github: GithubEvidence }) {
     const entries = Object.entries(github.aggregateLanguages);
     const total = entries.reduce((sum, [, bytes]) => sum + bytes, 0) || 1;
     return entries
-      .slice(0, MAX_LANGUAGES)
+      .slice(0, config.ui.maxChartLanguages)
       .map(([name, bytes]) => ({ name, share: Math.round((bytes / total) * 1000) / 10 }));
   }, [github.aggregateLanguages]);
 

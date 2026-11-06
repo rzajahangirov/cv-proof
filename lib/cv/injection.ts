@@ -2,29 +2,36 @@ import { config } from "@/lib/config";
 
 /**
  * Prompt-injection phrases in en/az/ru. Hidden white text is still present in
- * the extracted text, which is how it gets caught here. Cyrillic and Azerbaijani
- * letters are outside \b, hence the explicit Unicode lookarounds.
+ * the extracted text, which is how it gets caught here.
+ *
+ * PDF extraction often glues hidden text to the previous word ("RusIgnore all
+ * previous instructions"), so distinctive phrases must match mid-word. Only the
+ * short ones that occur inside ordinary words ("corpoRATE MEetings") need a
+ * boundary, written with lookarounds because \b ignores az/ru letters.
  */
 const NOT_LETTER_BEFORE = "(?<![\\p{L}\\p{N}])";
-const NOT_LETTER_AFTER = "(?![\\p{L}\\p{N}])";
 
-const PHRASES = [
+const DISTINCTIVE = [
   "ignore\\s+(?:all\\s+|any\\s+)?(?:of\\s+)?(?:the\\s+|your\\s+)?(?:previous|above|prior|earlier)\\s+(?:instructions?|prompts?|rules?)",
   "disregard\\s+(?:all\\s+)?(?:of\\s+)?(?:the\\s+|your\\s+)?(?:previous|above|prior|earlier)\\s+(?:instructions?|prompts?|rules?)",
-  "system\\s+prompt",
-  "give\\s+(?:this\\s+candidate\\s+|me\\s+)?(?:a\\s+)?(?:(?:score|rating)\\s+of\\s+)?100",
-  "rate\\s+(?:me|this\\s+candidate)",
-  "you\\s+are\\s+an?\\s+(?:ai|assistant|llm|language\\s+model)",
+  "you\\s+are\\s+an?\\s+(?:ai|assistant|llm|language\\s+model)(?![\\p{L}\\p{N}])",
+  "system\\s+prompt(?![\\p{L}\\p{N}])",
   "əvvəlki\\s+təlimatlar\\p{L}*",
   "bu\\s+namizədə",
-  "100\\s+bal",
   "игнорируй\\p{L}*",
   "предыдущие\\s+инструкции",
 ];
 
-const PATTERNS = PHRASES.map(
-  (phrase) => new RegExp(`${NOT_LETTER_BEFORE}${phrase}${NOT_LETTER_AFTER}`, "giu"),
-);
+const NEEDS_BOUNDARY = [
+  "give\\s+(?:this\\s+candidate\\s+|me\\s+)?(?:a\\s+)?(?:(?:score|rating)\\s+of\\s+)?100(?![\\p{L}\\p{N}])",
+  "rate\\s+(?:me|this\\s+candidate)(?![\\p{L}\\p{N}])",
+  "100\\s+bal(?![\\p{L}\\p{N}])",
+];
+
+const PATTERNS = [
+  ...DISTINCTIVE.map((phrase) => new RegExp(phrase, "giu")),
+  ...NEEDS_BOUNDARY.map((phrase) => new RegExp(NOT_LETTER_BEFORE + phrase, "giu")),
+];
 
 export function detectInjection(text: string): { detected: boolean; snippets: string[] } {
   const { maxInjectionSnippets, injectionSnippetContext } = config.cv;

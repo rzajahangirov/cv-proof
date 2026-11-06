@@ -69,7 +69,9 @@ async function collectRepo(
 
   const [languages, contributors, commits, readme, tree] = await Promise.all([
     optional(github.repos.listLanguages(target)),
-    optional(github.repos.listContributors({ ...target, per_page: 100 })),
+    optional(
+      github.repos.listContributors({ ...target, per_page: config.github.contributorsPerPage }),
+    ),
     optional(
       github.repos.listCommits({ ...target, author: login, per_page: config.github.commitsPerPage }),
     ),

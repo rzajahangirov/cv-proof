@@ -141,10 +141,17 @@ async function runSteps(id: string): Promise<void> {
   patch(id, { step: "done", error: null, ...finalize(candidate, job) });
 }
 
+function exists(id: string): boolean {
+  return useStore.getState().candidates.some((c) => c.id === id);
+}
+
+/** A candidate can disappear mid-run through remove, reset or import. */
 async function processCandidate(id: string): Promise<void> {
+  if (!exists(id)) return;
   try {
     await runSteps(id);
   } catch (error) {
+    if (!exists(id)) return;
     const code = error instanceof ApiClientError ? error.code : "unknown";
     patch(id, { step: "error", error: code });
   }
@@ -175,8 +182,26 @@ export function startRun(): void {
   pump();
 }
 
+/** Temporary GitHub failures must not cost a candidate their verification. */
+function hasTemporaryGithubError(candidate: Candidate): boolean {
+  const { githubError } = candidate.flags;
+  return githubError === "rate_limited" || githubError === "github_error";
+}
+
+export function canRetry(candidate: Candidate): boolean {
+  return (
+    candidate.step === "error" || (candidate.step === "done" && hasTemporaryGithubError(candidate))
+  );
+}
+
 export function retryCandidate(id: string): void {
-  patch(id, { step: "queued", error: null });
+  const candidate = current(id);
+  const githubReset: Partial<Candidate> = hasTemporaryGithubError(candidate)
+    ? // The interview kit was written without GitHub, so it is redone with it.
+      { flags: { ...candidate.flags, githubError: null }, interview: null }
+    : {};
+
+  patch(id, { step: "queued", error: null, ...githubReset });
   enqueue(id);
   pump();
 }

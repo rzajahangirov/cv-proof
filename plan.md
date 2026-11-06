@@ -606,26 +606,26 @@ public/demo/     (demo-results.json is added later by the team)
 Mark each `[x]` when done. Each milestone ends with lint + build passing and a short Azerbaijani
 summary to the team. That summary includes "Komandadan lazım olanlar".
 
-- [ ] **M0: Skeleton**
+- [x] **M0: Skeleton**
   - scaffold, shadcn, i18n, types/schemas, config, store, top bar, `/api/health`, mock banner
   - all 5 pages render with a hardcoded mock dataset (3–4 candidates covering every decision)
   - `.env.example`, minimal README with setup steps
-- [ ] **M1: Job + CV + Screen**
+- [x] **M1: Job + CV + Screen**
   - `/api/job/parse`, `/api/cv/parse`, `/api/cv/screen` (real + mock)
   - injection detection, blind/redaction, stage-1 scoring in code
   - runner for parse → screen; the upload page shows live progress
-- [ ] **M2: GitHub**
+- [x] **M2: GitHub**
   - `/api/github/collect`, metrics, red flags, error handling
   - runner step; GitHub tab (repo cards, charts, red flags)
-- [ ] **M3: Ensemble**
+- [x] **M3: Ensemble**
   - `/api/github/score`, consensus, merged claims
   - claim matrix and AI tab
-- [ ] **M4: Interview**
+- [x] **M4: Interview**
   - `/api/interview`, interview tab, copy-all
-- [ ] **M5: Finalize**
+- [x] **M5: Finalize**
   - final score + decision rules, candidates table (sort/filter/search), summary cards
   - HR override, retry on error
-- [ ] **M6: Demo & polish**
+- [x] **M6: Demo & polish**
   - export/import, demo mode, empty/loading states, visual polish
   - README (what it is, how it works, setup, screenshots placeholder)
   - final `npm run build`

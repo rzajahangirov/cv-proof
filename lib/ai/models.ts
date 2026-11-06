@@ -24,6 +24,7 @@ type ModelRef = { id: string; provider: ProviderName; modelId: string };
 
 export type ResolvedModel = { id: string; model: LanguageModel };
 
+// TODO(HUMAN): set the API keys and real model IDs in .env.local and on Vercel.
 /** The placeholder from .env.example counts as "not configured". */
 const PLACEHOLDER_MODEL_ID = "MODEL_ID";
 

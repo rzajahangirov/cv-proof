@@ -295,7 +295,7 @@ export const az = {
     file_too_large: "Fayl çox böyükdür",
     network_error: "Şəbəkə xətası, serverə çatmaq olmadı",
     server_error: "Server xətası",
-    file_missing: "Fayl artıq yaddaşda deyil. Səhifə yenilənib, faylı yenidən seçin",
+    file_missing: "Səhifə yeniləndiyi üçün fayl yaddaşda deyil. Bu sətri silib faylı yenidən seçin",
     interrupted: "Səhifə yeniləndiyi üçün analiz yarımçıq qaldı",
     no_job: "Vakansiya tapılmadı",
     user_not_found: "GitHub istifadəçisi tapılmadı",

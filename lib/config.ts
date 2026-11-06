@@ -55,8 +55,17 @@ export const config = {
     maxCodeChars: 3_000,
     maxCodeFileBytes: 30_000,
     maxManifestsPerRepo: 2,
+    contributorsPerPage: 100,
     monthsOfActivity: 24,
     maxEvidenceChars: 25_000,
+    /** Tried in order until the evidence pack fits maxEvidenceChars. */
+    evidenceTrimSteps: [
+      { code: 3_000, readme: 2_000, messages: 30 },
+      { code: 2_000, readme: 1_200, messages: 20 },
+      { code: 1_200, readme: 800, messages: 15 },
+      { code: 600, readme: 400, messages: 10 },
+      { code: 0, readme: 200, messages: 5 },
+    ],
     collectTimeoutMs: 50_000,
     redFlags: {
       bulkUploadMinSizeKb: 300,
@@ -68,5 +77,10 @@ export const config = {
       fewCommits: 10,
       shortMessageChars: 5,
     },
+  },
+  ui: {
+    maxChartLanguages: 8,
+    gaugeGoodScore: 70,
+    gaugeMediumScore: 50,
   },
 } as const;

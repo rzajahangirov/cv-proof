@@ -1,10 +1,11 @@
 "use client";
 
-import { Check, ExternalLink, GitBranch, Minus, Star, TriangleAlert } from "lucide-react";
+import { Check, ExternalLink, GitBranch, Minus, RotateCw, Star, TriangleAlert } from "lucide-react";
 import { GithubCharts } from "@/components/candidate-detail/github-charts";
 import { ClaimVerdictBadge } from "@/components/candidates/badges";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -17,6 +18,7 @@ import {
 import { useT } from "@/lib/i18n";
 import { errorKey } from "@/lib/i18n/core";
 import type { MessageKey } from "@/lib/i18n/core";
+import { canRetry, retryCandidate } from "@/lib/pipeline/runner";
 import type { Candidate, MergedClaim, RepoEvidence } from "@/lib/types";
 
 function noGithubReason(candidate: Candidate): MessageKey {
@@ -162,7 +164,20 @@ export function GithubTab({ candidate }: { candidate: Candidate }) {
         <Alert>
           <GitBranch aria-hidden />
           <AlertTitle>{t("detail.github.noGithubTitle")}</AlertTitle>
-          <AlertDescription>{t(noGithubReason(candidate))}</AlertDescription>
+          <AlertDescription>
+            <p>{t(noGithubReason(candidate))}</p>
+            {candidate.step === "done" && canRetry(candidate) && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-2"
+                onClick={() => retryCandidate(candidate.id)}
+              >
+                <RotateCw aria-hidden />
+                {t("upload.retry")}
+              </Button>
+            )}
+          </AlertDescription>
         </Alert>
       )}
 

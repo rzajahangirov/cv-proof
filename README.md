@@ -131,7 +131,9 @@ Bu sorğu hər modelə kiçik bir real zəng edir. Hər model üçün `"ok": tru
 
 ## Demo rejimi
 
-Ana səhifədəki **Demo rejimi** düyməsi `public/demo/demo-results.json` faylını yükləyir. Faylı hazırlamaq üçün real analiz aparın, **Namizədlər** səhifəsində **JSON export** edin və nəticəni həmin yola qoyun.
+Ana səhifədəki **Demo rejimi** düyməsi `public/demo/demo-results.json` faylını yükləyir. Repo-dakı fayl uydurma namizədlər və uydurma GitHub profilləri ilə hazırlanmış nümunə datadır, real analiz nəticəsi deyil. Ballar və qərarlar tətbiqin öz qaydaları ilə hesablanıb.
+
+Faylı real nəticələrlə əvəz etmək üçün analiz aparın, **Namizədlər** səhifəsində **JSON export** edin və nəticəni həmin yola qoyun. Repo açıq olduğu üçün əvvəlcə email, telefon və CV mətnini silin.
 
 ## Layihə strukturu
 

@@ -4,6 +4,7 @@ import { Scale, ThumbsUp } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useT } from "@/lib/i18n";
+import { errorKey } from "@/lib/i18n/core";
 import type { Candidate, ModelScore } from "@/lib/types";
 
 function BulletList({ title, items }: { title: string; items: string[] }) {
@@ -44,7 +45,7 @@ function ModelCard({ score }: { score: ModelScore }) {
           <Alert variant="destructive">
             <AlertDescription>
               <p className="font-medium">{t("detail.ai.modelFailed")}</p>
-              <p className="break-words">{score.error}</p>
+              <p className="break-words">{t(errorKey(score.error))}</p>
             </AlertDescription>
           </Alert>
         )}

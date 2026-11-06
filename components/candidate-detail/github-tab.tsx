@@ -2,6 +2,7 @@
 
 import { Check, ExternalLink, GitBranch, Minus, RotateCw, Star, TriangleAlert } from "lucide-react";
 import { GithubCharts } from "@/components/candidate-detail/github-charts";
+import { GithubUsernameForm } from "@/components/candidate-detail/github-username-form";
 import { ClaimVerdictBadge } from "@/components/candidates/badges";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -156,10 +157,13 @@ function RepoCard({ repo }: { repo: RepoEvidence }) {
 
 export function GithubTab({ candidate }: { candidate: Candidate }) {
   const t = useT();
-  const { github, consensus, mergedClaims } = candidate;
+  const { github, consensus, mergedClaims, stage1, step } = candidate;
+  const idle = step === "done" || step === "error";
 
   return (
     <div className="space-y-4">
+      {stage1?.passed && idle && <GithubUsernameForm candidate={candidate} />}
+
       {(!github || github.repos.length === 0) && (
         <Alert>
           <GitBranch aria-hidden />

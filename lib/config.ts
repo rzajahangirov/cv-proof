@@ -32,6 +32,8 @@ export const config = {
     /** Long enough for a full interview kit in Azerbaijani; defaults vary by provider. */
     maxOutputTokens: 8_000,
     timeoutMs: 45_000,
+    probeMaxOutputTokens: 500,
+    probeTimeoutMs: 20_000,
     schemaRetries: 1,
     maxClaims: 10,
     maxStrengths: 4,
@@ -69,6 +71,7 @@ export const config = {
       { code: 0, readme: 200, messages: 5 },
     ],
     collectTimeoutMs: 50_000,
+    probeTimeoutMs: 10_000,
     redFlags: {
       bulkUploadMinSizeKb: 300,
       bulkUploadMaxCommits: 2,

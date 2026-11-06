@@ -65,7 +65,7 @@ npm run dev
 
 Tətbiq <http://localhost:3000> ünvanında açılır.
 
-**Açarsız da işləyir.** `.env.local` boş qalsa, tətbiq mock rejimində açılır: AI cavabları saxtadır və bunu yuxarıdakı banner göstərir, CV oxunması və GitHub toplanması isə realdır.
+**Lokalda açarsız da işləyir.** `.env.local` boş qalsa, tətbiq mock rejimində açılır: AI cavabları saxtadır və bunu yuxarıdakı banner göstərir, CV oxunması və GitHub toplanması isə realdır. Vercel production-da isə açar yoxdursa, tətbiq saxta nəticə vermir, aydın xəta göstərir. Orada mock yalnız `MOCK_AI=true` ilə açılır.
 
 ### Mühit dəyişənləri
 
@@ -78,6 +78,7 @@ Tətbiq <http://localhost:3000> ünvanında açılır.
 | `AI_PRIMARY_MODEL` | Qalan bütün addımlar üçün bir model: `provider:modelId` |
 | `GITHUB_TOKEN` | GitHub fine-grained token (yalnız ictimai repoları oxumaq) |
 | `MOCK_AI` | `true` olsa, açar olsa belə saxta AI cavabları işlədilir |
+| `APP_PASSWORD` | Bütün tətbiq üçün ortaq parol. Boşdursa, tətbiq açıqdır |
 
 Açarların hamısı lazım deyil, açarı olmayan model sadəcə buraxılır. Əsas model əlçatan deyilsə, açarı olan ilk ansambl modeli istifadə olunur.
 
@@ -89,16 +90,41 @@ Açarların hamısı lazım deyil, açarı olmayan model sadəcə buraxılır. �
 
 ```bash
 npm run lint
+npm test
 npm run build
 ```
+
+GitHub Actions eyni yoxlamaları hər push-da işlədir.
 
 ## Vercel-ə yerləşdirmə
 
 1. Repo-nu Vercel-ə qoşun (framework avtomatik Next.js kimi tanınır).
 2. **Settings → Environment Variables** bölməsində yuxarıdakı dəyişənləri əlavə edin.
-3. Deploy edin və açılan səhifədə mock banner-inin görünmədiyini yoxlayın.
+3. Deploy edin. `main`-ə hər push avtomatik production-a gedir.
 
 Fayl limiti 4 MB-dır, çünki Vercel sorğu ölçüsünü 4.5 MB ilə məhdudlaşdırır. Hər API route ən çoxu 60 saniyə işləyir.
+
+### Canlıya çıxmazdan əvvəl
+
+**1. Modelləri yoxlayın.** Brauzerdə bu ünvanı açın:
+
+```text
+https://<layihəniz>.vercel.app/api/health?check=models
+```
+
+Bu sorğu hər modelə kiçik bir real zəng edir. Hər model üçün `"ok": true` və `githubCheck.ok: true` olmalıdır. Xəta kodlarının mənası:
+
+| Kod | Nə edilməlidir |
+|---|---|
+| `ai_auth` | Açar səhvdir və ya ləğv olunub, yenisini yazın |
+| `ai_model_not_found` | Model adı səhvdir və ya model bağlanıb, provayderin siyahısından cari adı götürün |
+| `ai_rate_limited` | Kvota və ya sürət limiti dolub |
+| `ai_invalid_output` | Model strukturlu cavab vermir, başqa model seçin |
+| `ai_timeout` | Model çox yavaşdır, daha sürətlisini seçin |
+
+**2. Girişi qurun.** Vercel Authentication aktivdirsə, tətbiqə yalnız Vercel komandasının üzvləri girə bilir. HR-ın da girməsi üçün **Settings → Deployment Protection** bölməsində production qorumasını söndürün və `APP_PASSWORD` təyin edin. Brauzer parol pəncərəsi açacaq, istifadəçi adı istənilən ola bilər.
+
+**3. Real CV-lər üçün ödənişli API işlədin.** CV-lərdə şəxsi məlumat var. Gemini API-nin pulsuz səviyyəsində göndərilən məlumat Google-un məhsullarını yaxşılaşdırmaq üçün istifadə oluna bilər.
 
 ## Demo rejimi
 
@@ -129,8 +155,9 @@ Next.js, TypeScript, Tailwind CSS, shadcn/ui, Vercel AI SDK (Anthropic, OpenAI, 
 
 ## Məhdudiyyətlər
 
-- Giriş sistemi və verilənlər bazası yoxdur. Məlumatlar yalnız brauzerdə saxlanılır, bir dəfəyə bir vakansiya işlənir.
-- API route-ları açıqdır. Deploy olunmuş ünvanı bilən hər kəs AI açarlarınızı işlədə bilər, ona görə linki ictimai paylaşmayın.
+- İstifadəçi hesabları və verilənlər bazası yoxdur. Məlumatlar yalnız brauzerdə saxlanılır, bir dəfəyə bir vakansiya işlənir. Başqa kompüterə keçmək üçün JSON export/import istifadə edin.
+- Bütün tətbiq üçün bir ortaq parol var. Bu parol olmadan ünvanı bilən hər kəs AI açarlarınızı işlədə bilər, ona görə public deploy-da `APP_PASSWORD` mütləq təyin edilməlidir.
+- GitHub hesabının namizədə aid olduğu yoxlanmır. Profil CV-dən götürülür, səhvdirsə HR onu **GitHub sübutu** tab-ında düzəldə bilər.
 - Skan olunmuş PDF-lər dəstəklənmir (OCR yoxdur).
 - Yalnız ictimai GitHub repoları yoxlanılır. Məxfi kod "sübut yoxdur" kimi görünür, bu isə "yalan iddia" demək deyil.
 

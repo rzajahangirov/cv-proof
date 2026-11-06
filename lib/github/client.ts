@@ -1,5 +1,7 @@
 import { Octokit } from "@octokit/rest";
 import { ApiError } from "@/lib/api";
+import { config } from "@/lib/config";
+import type { GithubProbe } from "@/lib/types";
 
 type HttpError = {
   status: number;
@@ -41,8 +43,19 @@ export async function optional<T>(request: Promise<T>): Promise<T | null> {
   }
 }
 
+export async function probeGithub(): Promise<GithubProbe> {
+  try {
+    const github = createGithubClient(AbortSignal.timeout(config.github.probeTimeoutMs));
+    const { remaining, limit } = (await github.rateLimit.get()).data.resources.core;
+    return { ok: true, error: null, remaining, limit };
+  } catch (error) {
+    return { ok: false, error: toGithubError(error).code, remaining: null, limit: null };
+  }
+}
+
 export function toGithubError(error: unknown): ApiError {
   if (isHttpError(error)) {
+    if (error.status === 401) return new ApiError("github_auth", "GitHub token is invalid", 502);
     if (error.status === 404) return new ApiError("user_not_found", "GitHub user not found", 404);
     if (error.status === 403 || error.status === 429) {
       return new ApiError("rate_limited", "GitHub rate limit reached", 429);

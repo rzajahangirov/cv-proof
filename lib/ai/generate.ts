@@ -2,6 +2,7 @@ import { generateText, NoObjectGeneratedError, NoOutputGeneratedError, Output } 
 import type { LanguageModel } from "ai";
 import type { z } from "zod";
 import { isMockMode } from "@/lib/ai/models";
+import { ApiError } from "@/lib/api";
 import { config } from "@/lib/config";
 
 function isSchemaFailure(error: unknown): boolean {
@@ -20,7 +21,8 @@ export async function generateStructured<T>(options: {
   mock: () => T;
 }): Promise<T> {
   const { model, system, prompt, schema, mock } = options;
-  if (isMockMode() || !model) return mock();
+  if (isMockMode()) return mock();
+  if (!model) throw new ApiError("ai_not_configured", "No AI model is configured", 503);
 
   const abortSignal = AbortSignal.timeout(config.ai.timeoutMs);
 

@@ -182,10 +182,11 @@ export function startRun(): void {
   pump();
 }
 
+const TEMPORARY_GITHUB_ERRORS = ["rate_limited", "github_error", "github_auth"];
+
 /** Temporary GitHub failures must not cost a candidate their verification. */
 function hasTemporaryGithubError(candidate: Candidate): boolean {
-  const { githubError } = candidate.flags;
-  return githubError === "rate_limited" || githubError === "github_error";
+  return TEMPORARY_GITHUB_ERRORS.includes(candidate.flags.githubError ?? "");
 }
 
 export function canRetry(candidate: Candidate): boolean {
@@ -202,6 +203,31 @@ export function retryCandidate(id: string): void {
     : {};
 
   patch(id, { step: "queued", error: null, ...githubReset });
+  enqueue(id);
+  pump();
+}
+
+/** A quota error usually hits many candidates at once. */
+export function retryAllFailed(): void {
+  useStore.getState().candidates.filter(canRetry).forEach((c) => retryCandidate(c.id));
+}
+
+/** HR's correction wins over the CV; everything GitHub-based is redone from it. */
+export function changeGithubUsername(id: string, username: string): void {
+  const { profile, flags } = current(id);
+  if (!profile) return;
+
+  patch(id, {
+    step: "queued",
+    error: null,
+    profile: { ...profile, githubUsername: username },
+    flags: { ...flags, githubError: null },
+    github: null,
+    modelScores: [],
+    consensus: null,
+    mergedClaims: [],
+    interview: null,
+  });
   enqueue(id);
   pump();
 }

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { classifyAiError } from "@/lib/ai/errors";
 import type { ApiResponse } from "@/lib/types";
 
 export class ApiError extends Error {
@@ -22,12 +23,10 @@ function toFailure(error: unknown): Response {
   if (error instanceof z.ZodError) return fail("invalid_input", z.prettifyError(error), 400);
 
   const message = error instanceof Error ? error.message : "Unknown error";
-  if (error instanceof Error && error.name === "TimeoutError") {
-    return fail("ai_timeout", message, 504);
-  }
+  const code = classifyAiError(error);
   // Only the message: provider errors carry the request body, i.e. CV data.
-  console.error("[api]", message);
-  return fail("ai_error", message.slice(0, 300), 502);
+  console.error("[api]", code, message);
+  return fail(code, message.slice(0, 300), code === "ai_timeout" ? 504 : 502);
 }
 
 /** Wraps a route handler in the `{ ok, data | error }` envelope (plan §7). */

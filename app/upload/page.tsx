@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Loader2, Play, TriangleAlert } from "lucide-react";
+import { ArrowRight, Loader2, Play, RotateCw, TriangleAlert } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { HydrationGate } from "@/components/layout/hydration-gate";
@@ -14,7 +14,7 @@ import { ProgressRow } from "@/components/upload/progress-row";
 import { config } from "@/lib/config";
 import { useT } from "@/lib/i18n";
 import type { MessageKey } from "@/lib/i18n/core";
-import { startRun } from "@/lib/pipeline/runner";
+import { canRetry, retryAllFailed, startRun } from "@/lib/pipeline/runner";
 import { isRunning, useStore } from "@/lib/store";
 
 type Skipped = { name: string; reason: MessageKey };
@@ -59,6 +59,7 @@ function UploadContent() {
   const finished = candidates.filter((c) => c.step === "done" || c.step === "error").length;
   const running = candidates.some(isRunning);
   const waiting = candidates.some((c) => c.step === "queued");
+  const retryable = candidates.filter(canRetry).length;
 
   if (!hasJob) {
     return (
@@ -77,6 +78,7 @@ function UploadContent() {
   return (
     <div className="space-y-6">
       <FilePicker onFiles={handleFiles} />
+      <p className="text-sm text-muted-foreground">{t("upload.privacyNote")}</p>
 
       {skipped.length > 0 && (
         <Alert>
@@ -98,6 +100,12 @@ function UploadContent() {
         <CardHeader className="flex flex-row items-center justify-between gap-4">
           <CardTitle>{t("upload.filesTitle")}</CardTitle>
           <div className="flex items-center gap-2">
+            {retryable > 1 && !running && (
+              <Button variant="outline" onClick={retryAllFailed}>
+                <RotateCw aria-hidden />
+                {t("upload.retryAll", { count: retryable })}
+              </Button>
+            )}
             {finished > 0 && (
               <Button variant="outline" asChild>
                 <Link href="/candidates">

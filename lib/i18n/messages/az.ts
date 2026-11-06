@@ -15,6 +15,7 @@ export const az = {
     noGithubToken:
       "GITHUB_TOKEN təyin edilməyib: GitHub sorğu limiti aşağıdır, bir neçə namizəddən sonra tükənə bilər.",
     missingModels: "Açarı olmayan modellər buraxılır: {models}",
+    notConfigured: "AI modeli qurulmayıb. Analiz işləməyəcək: açarları və model adlarını yoxlayın.",
   },
   common: {
     loading: "Yüklənir…",
@@ -106,7 +107,10 @@ export const az = {
     viewCandidates: "Namizədlərə bax",
     progress: "{done} / {total} tamamlandı",
     retry: "Yenidən cəhd",
+    retryAll: "Hamısını yenidən cəhd et ({count})",
     removeFile: "Faylı sil",
+    privacyNote:
+      "CV mətni analiz üçün AI provayderlərinə göndərilir. Fayllar serverdə saxlanılmır, nəticələr yalnız bu brauzerdə qalır.",
   },
   pipeline: {
     parse: "Parse",
@@ -190,6 +194,11 @@ export const az = {
       noEvidence: "Sübut göstərilməyib",
     },
     github: {
+      usernameLabel: "GitHub profili",
+      usernamePlaceholder: "istifadəçi adı və ya profil linki",
+      usernameCheck: "Yoxla",
+      usernameHint: "CV-dən avtomatik götürülür. Səhvdirsə və ya yoxdursa, burada yazın: GitHub yoxlaması yenidən işləyəcək.",
+      invalidUsername: "GitHub istifadəçi adı və ya linki yanlışdır",
       noGithubTitle: "GitHub sübutu yoxdur",
       noUsername: "CV-də GitHub profili tapılmadı. Namizədin iddiaları əl ilə yoxlanılmalıdır.",
       noRepos: "Profil tapıldı, amma analiz ediləcək öz repozitoriyası yoxdur. Çox vaxt peşəkar kod məxfi olur, buna görə bal verilmədi.",
@@ -288,9 +297,14 @@ export const az = {
   },
   errors: {
     invalid_input: "Daxil edilən məlumat yanlışdır",
+    auth_required: "Giriş üçün parol lazımdır",
     ai_error: "AI xidməti xəta qaytardı",
-    ai_timeout: "AI cavabı çox gecikdi",
-    all_models_failed: "Heç bir AI modeli cavab vermədi",
+    ai_timeout: "AI cavabı çox gecikdi. Daha sürətli model seçin və ya yenidən cəhd edin",
+    ai_auth: "AI açarı yanlışdır və ya ləğv olunub",
+    ai_model_not_found: "AI modeli tapılmadı: model adı səhvdir və ya model bağlanıb",
+    ai_rate_limited: "AI limiti doldu: sürət limiti və ya kvota bitib. Bir az sonra yenidən cəhd edin",
+    ai_invalid_output: "AI uyğun formatda cavab vermədi. Yenidən cəhd edin",
+    ai_not_configured: "AI modeli qurulmayıb: açarları və model adlarını yoxlayın",
     scanned_pdf: "Faylda mətn yoxdur, çox güman skan olunmuş PDF-dir (OCR dəstəklənmir)",
     unreadable_file: "Fayl oxunmadı, zədələnmiş və ya şifrəli ola bilər",
     unsupported_file: "Yalnız PDF və DOCX qəbul olunur",
@@ -303,6 +317,7 @@ export const az = {
     user_not_found: "GitHub istifadəçisi tapılmadı",
     rate_limited: "GitHub sorğu limiti bitdi",
     github_error: "GitHub xətası",
+    github_auth: "GITHUB_TOKEN yanlışdır və ya vaxtı bitib",
     storage_full: "Brauzer yaddaşı doldu. Yeni nəticələr səhifə yenilənəndə itə bilər, JSON export edin",
     unknown: "Naməlum xəta",
   },

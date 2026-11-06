@@ -66,8 +66,14 @@ export function getEnsembleModels(): ResolvedModel[] {
   return parseEnsemble().flatMap((ref) => resolve(ref) ?? []);
 }
 
+/**
+ * Without keys the app falls back to fake answers, which is right for a demo
+ * and wrong for real hiring. A broken setup in production must fail visibly, so
+ * there mock mode has to be requested with MOCK_AI=true.
+ */
 export function isMockMode(): boolean {
-  return process.env.MOCK_AI === "true" || getPrimaryModel() === null;
+  if (process.env.MOCK_AI === "true") return true;
+  return process.env.VERCEL_ENV !== "production" && getPrimaryModel() === null;
 }
 
 export function getHealth(): HealthInfo {

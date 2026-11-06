@@ -20,6 +20,8 @@ const mono = Geist_Mono({
 export const metadata: Metadata = {
   title: az.app.name,
   description: az.app.description,
+  // An internal HR tool has no reason to appear in search results.
+  robots: { index: false, follow: false },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

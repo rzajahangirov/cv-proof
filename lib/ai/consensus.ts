@@ -1,6 +1,7 @@
+import { classifyAiError } from "@/lib/ai/errors";
 import { generateStructured } from "@/lib/ai/generate";
 import { MOCK_MODEL_IDS, mockGithubScore } from "@/lib/ai/mock";
-import { getEnsembleModels, isMockMode } from "@/lib/ai/models";
+import { getEnsembleModels, getPrimaryModel, isMockMode } from "@/lib/ai/models";
 import type { ResolvedModel } from "@/lib/ai/models";
 import { githubScorePrompt, githubScoreSystem } from "@/lib/ai/prompts/github-score";
 import { config } from "@/lib/config";
@@ -11,15 +12,22 @@ import type { BlindProfile, Claim, GithubEvidence, Job, ModelScore } from "@/lib
 type EnsembleTarget = { id: string; model: ResolvedModel["model"] | null };
 
 function ensembleTargets(): EnsembleTarget[] {
-  return isMockMode() ? MOCK_MODEL_IDS.map((id) => ({ id, model: null })) : getEnsembleModels();
+  if (isMockMode()) return MOCK_MODEL_IDS.map((id) => ({ id, model: null }));
+
+  const models = getEnsembleModels();
+  if (models.length > 0) return models;
+  // Only AI_PRIMARY_MODEL is set: one opinion still beats no GitHub check.
+  const primary = getPrimaryModel();
+  return primary ? [primary] : [];
 }
 
 function failedScore(modelId: string, reason: unknown): ModelScore {
-  const message = reason instanceof Error ? reason.message : String(reason);
+  const code = classifyAiError(reason);
+  console.error("[ensemble]", modelId, code, reason instanceof Error ? reason.message : "");
   return {
     modelId,
     ok: false,
-    error: message.slice(0, 200),
+    error: code,
     score: null,
     summary: "",
     strengths: [],

@@ -50,11 +50,22 @@ export type ApiResponse<T> =
   | { ok: true; data: T }
   | { ok: false; error: { code: string; message: string } };
 
+export type ModelProbe = { id: string; ok: boolean; error: string | null };
+
+export type GithubProbe = {
+  ok: boolean;
+  error: string | null;
+  remaining: number | null;
+  limit: number | null;
+};
+
 export type HealthInfo = {
   mock: boolean;
   primaryModel: string | null;
   ensemble: { id: string; available: boolean }[];
   github: boolean;
+  models?: ModelProbe[];
+  githubCheck?: GithubProbe;
 };
 
 /** Screening adds the LLM's injection signal next to the Stage1Result. */

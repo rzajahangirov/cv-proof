@@ -12,8 +12,9 @@ export const POST = route(async (request): Promise<GithubScoreResponse> => {
 
   const consensus = computeConsensus(modelScores);
   if (!consensus) {
-    const reason = modelScores.find((model) => model.error)?.error ?? "No model available";
-    throw new ApiError("all_models_failed", reason, 502);
+    // The first failing model's reason tells HR what to do; "all failed" would not.
+    const code = modelScores.find((model) => model.error)?.error ?? "ai_not_configured";
+    throw new ApiError(code, "No model returned a score", 502);
   }
 
   return {

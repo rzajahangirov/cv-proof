@@ -75,7 +75,16 @@ function DecisionCell({ candidate }: { candidate: Row }) {
   if (candidate.step !== "done") {
     return <span className="text-sm text-muted-foreground">{t("candidates.inProgress")}</span>;
   }
-  return <DecisionBadge decision={candidate.decision} />;
+  return (
+    <div className="space-y-1">
+      <DecisionBadge decision={candidate.decision} />
+      {candidate.hrDecision && (
+        <p className="text-sm font-medium">
+          {t("candidates.hrDecision", { decision: t(`hrDecision.${candidate.hrDecision}`) })}
+        </p>
+      )}
+    </div>
+  );
 }
 
 const columns = helper.columns([

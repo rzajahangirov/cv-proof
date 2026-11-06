@@ -32,6 +32,7 @@ export async function generateStructured<T>(options: {
         prompt,
         output: Output.object({ schema }),
         temperature: config.ai.temperature,
+        maxOutputTokens: config.ai.maxOutputTokens,
         abortSignal,
       });
       return result.output;

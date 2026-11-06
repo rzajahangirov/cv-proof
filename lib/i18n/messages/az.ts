@@ -26,6 +26,7 @@ export const az = {
     percent: "{value}%",
     notAvailable: "—",
     openOnGithub: "GitHub-da aç",
+    language: "Dil",
   },
   home: {
     title: "CV-ləri yoxlayın, iddiaları GitHub ilə sübut edin",
@@ -154,6 +155,7 @@ export const az = {
     flagGithubError: "GitHub yoxlanıla bilmədi",
     flagNeedsReview: "AI modelləri razılaşmır",
     inProgress: "Analiz gedir",
+    hrDecision: "HR: {decision}",
   },
   detail: {
     notFound: "Namizəd tapılmadı.",

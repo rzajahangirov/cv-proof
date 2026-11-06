@@ -81,6 +81,8 @@ Tətbiq <http://localhost:3000> ünvanında açılır.
 
 Açarların hamısı lazım deyil, açarı olmayan model sadəcə buraxılır. Əsas model əlçatan deyilsə, açarı olan ilk ansambl modeli istifadə olunur.
 
+`AI_PRIMARY_MODEL` üçün sürətli model seçin: hər AI addımının 45 saniyə vaxtı var, uzun CV-lərdə yavaş model bu limiti aşa bilər. Limitlər [lib/config.ts](lib/config.ts) faylındadır.
+
 > `GITHUB_TOKEN` olmadan GitHub saatda cəmi 60 sorğuya icazə verir, bir namizəd isə 40-a qədər sorğu işlədir. Real sınaq üçün token mütləq əlavə edin.
 
 ### Yoxlama əmrləri

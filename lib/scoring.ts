@@ -74,7 +74,8 @@ export function mergeClaims(
       if (!entry) continue;
       votes[entry.verdict] += 1;
       if (entry.evidence) evidence.push(entry.evidence);
-      if (entry.link) links.add(entry.link);
+      // Links come from an LLM and end up in an href, so only real URLs pass.
+      if (entry.link?.startsWith("https://")) links.add(entry.link);
     }
 
     const top = Math.max(...Object.values(votes));
